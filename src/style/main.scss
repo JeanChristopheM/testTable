@@ -24,3 +24,40 @@ tfoot {
 tfoot th {
   font-weight: normal;
 }
+
+.layout {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  overflow: hidden;
+  .wrapper {
+    position: relative;
+    height: 100%;
+    display: flex;
+    .menu {
+      flex: 1 1 0%;
+      max-width: 20rem;
+      border: 1px solid black;
+    }
+    .content {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      flex: 1 1 0%;
+      overflow: hidden;
+      height: 100%;
+      border-bottom: 4px solid red;
+      .header {
+        border: 1px solid black;
+        min-height: 100px;
+      }
+      .smth {
+        position: relative;
+        overflow: auto;
+        height: 100%;
+      }
+    }
+  }
+}

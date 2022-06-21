@@ -4,7 +4,7 @@
 
 // export default App;
 
-import React, { useEffect, useLayoutEffect } from "react";
+import React, { useEffect, useLayoutEffect, useRef } from "react";
 import ReactDOM from "react-dom";
 
 import "./style/main.scss";
@@ -28,10 +28,12 @@ function App() {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [scrollPos, setScrollPos] = React.useState(null);
 
+  const ref = useRef<HTMLDivElement>();
+
   useLayoutEffect(() => {
-    if (scrollPos) {
-      window.scroll(0, scrollPos);
-      console.log("just scrolled to ", scrollPos);
+    if (scrollPos && ref.current) {
+      ref.current.scroll(0, scrollPos);
+      console.log("just scrolled div to ", scrollPos);
     }
   }, [data, scrollPos]);
 
@@ -85,7 +87,9 @@ function App() {
   );
 
   const refreshData = () => {
-    setScrollPos(window.scrollY);
+    if (ref.current) {
+      setScrollPos(ref.current.scrollTop);
+    }
     return setData(() => makeData(1000));
   };
 
@@ -103,65 +107,81 @@ function App() {
   console.log("%c---RERENDER---", "color: #c3602c");
   return (
     <>
-      <Filler />
-      <div className="p-2">
-        <div className="h-2" />
-        <table>
-          <thead>
-            {instance.getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <th key={header.id} colSpan={header.colSpan}>
-                      {header.isPlaceholder ? null : (
-                        <div
-                          {...{
-                            className: header.column.getCanSort()
-                              ? "cursor-pointer select-none"
-                              : "",
-                            onClick: header.column.getToggleSortingHandler(),
-                          }}
-                        >
-                          {header.renderHeader()}
-                          {{
-                            asc: " 🔼",
-                            desc: " 🔽",
-                          }[header.column.getIsSorted() as string] ?? null}
-                        </div>
-                      )}
-                    </th>
-                  );
-                })}
-              </tr>
-            ))}
-          </thead>
-          <tbody>
-            {instance
-              .getRowModel()
-              .rows.slice(0, 100)
-              .map((row) => {
-                return (
-                  <tr key={row.id}>
-                    {row.getVisibleCells().map((cell) => {
-                      return <td key={cell.id}>{cell.renderCell()}</td>;
-                    })}
-                  </tr>
-                );
-              })}
-          </tbody>
-        </table>
-        <div>{instance.getRowModel().rows.length} Rows</div>
-        <div>
-          <button onClick={() => rerender()}>Force Rerender</button>
+      <div className="layout">
+        <div className="wrapper">
+          <div className="menu">
+            <ul>
+              <li>MENU 1</li>
+              <li>MENU 2</li>
+            </ul>
+          </div>
+          <div className="content">
+            <div className="header">
+              <h2>header</h2>
+            </div>
+            <div className="smth" ref={ref}>
+              <div className="tableContainer">
+                <table>
+                  <thead>
+                    {instance.getHeaderGroups().map((headerGroup) => (
+                      <tr key={headerGroup.id}>
+                        {headerGroup.headers.map((header) => {
+                          return (
+                            <th key={header.id} colSpan={header.colSpan}>
+                              {header.isPlaceholder ? null : (
+                                <div
+                                  {...{
+                                    className: header.column.getCanSort()
+                                      ? "cursor-pointer select-none"
+                                      : "",
+                                    onClick:
+                                      header.column.getToggleSortingHandler(),
+                                  }}
+                                >
+                                  {header.renderHeader()}
+                                  {{
+                                    asc: " 🔼",
+                                    desc: " 🔽",
+                                  }[header.column.getIsSorted() as string] ??
+                                    null}
+                                </div>
+                              )}
+                            </th>
+                          );
+                        })}
+                      </tr>
+                    ))}
+                  </thead>
+                  <tbody>
+                    {instance
+                      .getRowModel()
+                      .rows.slice(0, 100)
+                      .map((row) => {
+                        return (
+                          <tr key={row.id}>
+                            {row.getVisibleCells().map((cell) => {
+                              return <td key={cell.id}>{cell.renderCell()}</td>;
+                            })}
+                          </tr>
+                        );
+                      })}
+                  </tbody>
+                </table>
+              </div>
+              <div className="feedback">
+                <div>{instance.getRowModel().rows.length} Rows</div>
+                <div>
+                  <button onClick={() => rerender()}>Force Rerender</button>
+                </div>
+                <div style={{ position: "fixed", top: "0", right: "0" }}>
+                  <button onClick={() => refreshData()}>Refresh Data</button>
+                </div>
+                <pre>{JSON.stringify(sorting, null, 2)}</pre>
+              </div>
+            </div>
+          </div>
         </div>
-        <div style={{ position: "fixed", top: "0", right: "0" }}>
-          <button onClick={() => refreshData()}>Refresh Data</button>
-          <div>{scrollPos}</div>
-          <div>{window.scrollY}</div>
-        </div>
-        <pre>{JSON.stringify(sorting, null, 2)}</pre>
       </div>
-      <Filler />
     </>
   );
 }
